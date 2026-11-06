@@ -1,0 +1,526 @@
+<!doctype html><html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NEMESIS 5.4 • Marin közvetlen AI</title><style>
+*{box-sizing:border-box}body{margin:0;background:#02040d;color:#e9f8ff;font:14px system-ui,Arial;min-height:100dvh}canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0}main{position:relative;z-index:2;min-height:100dvh;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none;padding:12px;gap:8px}.top,.panel,.bottom{pointer-events:auto}.top{text-align:center}.brand{letter-spacing:.45em;font-size:22px;font-weight:700;text-shadow:0 0 20px #32bfff}.sub{color:#78bbd3;font-size:10px;letter-spacing:.25em;margin-top:5px}.pill{display:inline-block;border:1px solid #33758a77;border-radius:99px;background:#061424bb;padding:7px 13px;margin-top:12px;font-size:11px;color:#b6ecff}.panel{width:min(100%,550px);margin:0 auto;background:#071324dc;border:1px solid #3a9bb54a;box-shadow:0 10px 50px #0009, inset 0 1px #aaf2ff1b;border-radius:22px;padding:14px;backdrop-filter:blur(16px)}.bottom{width:min(100%,550px);margin:0 auto;max-height:46dvh;overflow-y:auto;scrollbar-width:thin}.response{min-height:28px;max-height:65px;overflow:auto;text-align:center;color:#bcecff;line-height:1.5;padding:5px 4px}.status{text-align:center;font-size:11px;color:#7ab8cf;letter-spacing:.14em}button,select,input{font:inherit}button{background:linear-gradient(135deg,#113750,#151a43);color:#e6faff;border:1px solid #3a9bb58a;border-radius:12px;padding:11px 12px;cursor:pointer}button:active{transform:scale(.97)}button.primary{background:linear-gradient(120deg,#007b9e,#6541bb);font-weight:700}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.composer{display:flex;gap:7px;margin-top:10px}.composer input{min-width:0;flex:1;border:1px solid #4e8ba47a;border-radius:12px;background:#020916;color:white;padding:12px}.composer button{flex-shrink:0}.settings{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px;font-size:11px;color:#9ad0e0}.settings label{display:flex;flex-direction:column;gap:5px}.settings input,.settings select{width:100%;accent-color:#54ddff}.settings select{background:#0a1a2a;color:white;border:1px solid #4e8ba47a;border-radius:7px;padding:7px}.hint{font-size:10px;color:#7da4b6;line-height:1.5;margin-top:9px}.mode{color:#b1efff;text-align:center;font-size:12px;letter-spacing:.17em;margin:4px}.footer{text-align:center;font-size:10px;color:#527f92;padding:5px}.panel details summary{cursor:pointer;color:#9cddff;font-size:12px;padding:8px 2px}.panel details{margin-top:8px}.panel details .hint{margin-bottom:4px}.top{pointer-events:none}.top .pill{pointer-events:auto}.fullscreen{position:absolute;right:10px;top:10px;pointer-events:auto;padding:7px 9px;font-size:12px}.actions button{padding:9px 6px}@media(max-height:690px){.brand{font-size:17px}.panel{padding:10px}.response{min-height:30px}.pill{margin-top:5px}} 
+.connection{text-align:center;font-size:10px;color:#ffc889;margin:7px 0;letter-spacing:.06em}.connection.online{color:#7ef6c8}.voice-preview{display:flex;align-items:center;gap:10px;margin-top:10px;border:1px solid #36839a55;background:#071f32a8;padding:8px;border-radius:12px}.voice-preview button{white-space:nowrap;font-size:11px;padding:9px}.voice-preview span{font-size:10px;color:#8ab8c9}.bottom{max-height:49dvh}.response{max-height:145px}.actions button{min-height:43px}@media(max-width:390px){.voice-preview{flex-wrap:wrap}.voice-preview span{font-size:9px}}
+.shape-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:7px 0}.shape-grid button{font-size:10px;padding:8px 3px;min-height:34px}.panel .composer{margin:0 0 10px}.panel .composer input{font-size:16px}.bottom{max-height:62dvh}.actions{grid-template-columns:repeat(3,minmax(0,1fr))}.hint{line-height:1.4}.live-box{border:1px solid #3a9bb588;border-radius:14px;padding:12px;margin:12px 0;background:#081b31bb}.live-heading{font-weight:700;color:#9feaff;letter-spacing:.08em}.live-label{display:block;color:#aee8ff;margin-top:10px;font-size:12px}.live-label select{display:block;width:100%;margin-top:6px;padding:10px;background:#071626;color:#fff;border:1px solid #489bb8;border-radius:9px}.live-buttons{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.live-buttons button{flex:1;min-width:110px;font-size:12px}#liveStatus{overflow-wrap:anywhere;color:#a9f0e0}</style></head><body><canvas id="c"></canvas><main><button class="fullscreen" id="full" title="Teljes képernyő">⛶</button><div class="top"><div class="brand">NEMESIS</div><div class="sub">HOLOGRAPHIC INTELLIGENCE • 7.2 GEMINI LIVE • KORE</div><div class="pill" id="state">◈ RENDSZER AKTÍV</div></div><div class="bottom"><div style="display:flex;justify-content:center;gap:8px;margin-bottom:8px"><button id="humanForm" type="button">♙ Humanoid</button><button id="orbForm" type="button">◉ Energiagömb</button></div><div class="mode" id="formName">HOLOGRAFIKUS NŐI ARC</div><section class="panel"><div class="response" id="answer">Próbáld: „Változz farkassá!” vagy „Beszélj a vulkánról!”</div><div class="status" id="status">HALLGATÁSRA KÉSZ</div><div class="connection" id="connection">◌ GEMINI KAPCSOLAT NINCS BEÁLLÍTVA</div><div class="actions"><button id="mic" class="primary">🎙️ Beszélj</button><button id="live" type="button">◉ Élő mód: KI</button><button id="demo">✧ Bemutató</button></div>
+<div class="hint" id="micHelp">A mikrofon a böngésző engedélyét igényli. Helyi content:// fájlból Androidon korlátozott lehet. A szöveges mező használható, ha van AI-kapcsolat. A mikrofonhoz HTTPS-címről nyisd meg az oldalt.</div>
+<details><summary>◈ Alakváltás és színek</summary><div id="shapeGrid" class="shape-grid"></div><div class="settings"><label>Részecskeszín<select id="palette"><option value="original">Eredeti, alakhoz igazodó</option><option value="cyan">Jégkék</option><option value="violet">Lila</option><option value="rose">Rózsaszín</option><option value="gold">Arany</option><option value="emerald">Smaragdzöld</option><option value="rainbow">Színváltó</option></select></label><label>Fényerő<input id="brightness" type="range" min="55" max="130" value="100"></label></div></details><div class="live-box" id="shapeAutomation"><div class="live-heading">✧ INTELLIGENS ALAKVÁLTÁS • LIVE</div><label class="live-label"><input type="checkbox" id="autoMorph" checked> Beszéd alapján automatikusan váltsak alakot</label><div class="hint">Ha például a galaxisról, a DNS-ről vagy egy farkasról beszélsz, NEMESIS a felismert fogalom alapján alakot vált. Az eredeti 14 forma és az új 50 alak is elérhető.</div><div class="live-buttons"><button id="liveDemo" type="button">✧ Beszélő alakváltás-bemutató</button><button id="liveDemoStop" type="button">■ Bemutató vége</button></div><div class="live-heading" style="margin-top:12px">◉ CYBER VOICE</div><label class="live-label">Hangprofil<select id="cyberPreset"><option value="holo" selected>Holografikus Kore • finom visszhang</option><option value="natural">Természetes Kore</option><option value="cyber">Cyber Kore • erősebb effekt</option></select></label><label class="live-label">Visszhang <input id="cyberEcho" type="range" min="0" max="100" value="22" style="width:100%"></label><div class="hint" id="morphStatus">Automatikus alakváltás: készenlét.</div></div><div class="live-box"><div class="live-heading">◉ GEMINI LIVE • VALÓS IDEJŰ BESZÉLGETÉS</div><div class="hint">A régi szöveges AI és Kore hangpróba is megmarad. Itt külön csatlakozhatsz a Gemini Live-hoz. Mikrofonhoz HTTPS vagy localhost kell, a telefonon letöltött content:// fájl általában nem elég.</div><label class="live-label">Live modell<select id="liveModel"><option value="gemini-3-flash-preview">Gemini 3 Flash (próba)</option><option value="gemini-2.5-flash-native-audio-preview-09-2025">Gemini 2.5 Flash Native Audio (próba)</option><option value="custom">Más Live modell kézzel…</option></select></label><input id="liveCustom" placeholder="Live modell azonosítója" style="display:none;width:100%;margin-top:7px;background:#061323;color:white;border:1px solid #479fc0;border-radius:9px;padding:10px"><div class="live-buttons"><button id="liveConnect" class="primary" type="button">◉ Live kapcsolódás</button><button id="liveDisconnect" type="button">■ Leállítás</button><button id="liveTextSend" type="button">➤ Szöveg küldése Live-nak</button></div><div id="liveStatus" class="hint" role="status">Nincs Live kapcsolat.</div><div class="hint">A Live API kvótája különbözik a szöveges modellekétől. A modellnek támogatnia kell a kétirányú hangot. Ez a böngészős, közvetlen kulcsos kapcsolat kizárólag személyes próba, nem biztonságos nyilvános terjesztésre.</div></div><div class="voice-preview"><button id="previewVoice" type="button">▶ Régi V4 hangminta</button><span>Korábbi hangminta, nem az új Kore beszéd</span></div><form id="form" class="composer"><input id="prompt" placeholder="Pl.: Változz farkassá! / Beszélj a vulkánról!" autocomplete="off"><button class="primary">➤</button></form><details open><summary>✦ GEMINI AI + KORE HANG</summary>
+<div class="hint">Valódi online Gemini szöveges AI kézi modellválasztással + Kore beszédgenerálás. Ez az első működő integrációs lépcső, még nem folyamatos Gemini Live hangfolyam. A holografikus részecskeanimáció és alakváltás megmarad.</div>
+<div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap"><input id="gemKey" type="password" placeholder="Gemini API-kulcs (AIza...)" style="flex:1;min-width:170px;background:#06152b;color:white;border:1px solid #345577;border-radius:10px;padding:11px"><button id="connect" type="button">Modellkeresés + kapcsolat</button></div>
+<div style="margin-top:12px;border:1px solid #397c9b77;border-radius:12px;padding:11px;background:#071b2c"><label for="modelSelect" style="display:block;color:#b6ecff;margin-bottom:7px">◈ Gemini Flash modell kézi kiválasztása</label><select id="modelSelect" style="width:100%;font-size:15px;padding:12px;border:1px solid #479fc0;border-radius:9px;background:#061323;color:white"><option value="gemini-2.5-flash">Gemini 2.5 Flash</option><option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option><option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option><option value="gemini-2.0-flash">Gemini 2.0 Flash (régebbi)</option><option value="custom">Más modell, kézzel megadom…</option></select><input id="customModel" placeholder="pl. gemini-3-flash-preview" style="display:none;width:100%;margin-top:8px;background:#061323;color:white;border:1px solid #479fc0;border-radius:9px;padding:11px"><div style="display:flex;gap:7px;margin-top:9px;flex-wrap:wrap"><button id="loadModels" type="button">↻ Elérhető modellek listája</button><button id="testSelected" type="button" class="primary">✓ Kiválasztott modell tesztje</button></div><div id="modelInfo" class="hint" style="overflow-wrap:anywhere">A választott modell marad aktív. Nem váltunk át másikra automatikusan.</div></div>
+<div class="hint">A kulcs csak az oldal memóriájában marad, nem mentjük fájlba. Közvetlen böngészős API-hívás: kizárólag személyes tesztre, nyilvános közzétételre nem biztonságos. Android APK-hoz később védett kiszolgáló szükséges.</div>
+<div style="display:flex;align-items:center;gap:10px;margin-top:12px"><label style="flex:1;font-size:12px">Sci-fi visszhang <input id="echo" type="range" min="0" max="45" value="22" style="width:100%"></label><button id="testKore" type="button">▶ Kore hangpróba</button></div>
+<div class="hint">A hangpróba valódi Gemini TTS API-t hív, ezért aktív API-kulcs és rendelkezésre álló kvóta szükséges. Ha a TTS modell nem érhető el az ingyenes keretedben, hibaüzenetet kapsz, nem helyettesítjük más hanggal.</div>
+</details></section><div class="footer">NEMESIS 7.1 • GEMINI LIVE KORE</div></div></main><script>
+const $=id=>document.getElementById(id),canvas=$('c'),ctx=canvas.getContext('2d');let W=0,H=0,dpr=1,clock=0,energy=0,speaking=false,listening=false,current=12,target=12,blend=1,autoDemo=false;const names=['PLAZMAGÖMB','GALAXIS','ENERGIASZÍV','IDŐGYŰRŰ','DNS-SPIRÁL','ENERGIAHULLÁM','CSILLAG','VÉGTELEN','ATOM','PILLANGÓ','VIRÁG','ENERGIATORNÁDÓ','HOLOGRAFIKUS NŐI ARC','GENERÁLT ENERGIAFORMA'];const colors=[[184,268,318],[205,278,40],[325,348,285],[42,192,230],[175,260,310],[190,225,290],[45,190,300],[280,190,335],[185,42,265],[310,175,220],[315,35,185],[185,255,300],[190,205,40],[195,285,42]];let pts=[];let customLabel='',customCloud=[],customSeed=0;function resize(){dpr=Math.min(devicePixelRatio||1,1.5);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);pts=Array.from({length:(W<700?7800:10500)},()=>({a:Math.random()*Math.PI*2,b:Math.acos(Math.random()*2-1),u:Math.random(),v:Math.random(),seed:Math.random()*50,speed:.6+Math.random()*1.6}));}addEventListener('resize',resize);resize();
+function geometry(p,shape,t){let a=p.a,b=p.b,u=p.u,v=p.v,x=Math.sin(b)*Math.cos(a),y=Math.cos(b),z=Math.sin(b)*Math.sin(a);if(shape===12){
+// Close-up volumetric female face, built entirely from 3D-positioned light particles.
+// Facial features are individual point clouds, with animated eyelids and lips.
+const r=p.v, th=a, lat=2*u-1,rr=Math.sqrt(Math.max(0,1-lat*lat));
+const blinkPhase=(t%4.7), blink=Math.max(0,1-Math.abs(blinkPhase-3.65)/.115);
+const talk=speaking?(.36+.64*Math.abs(Math.sin(t*11.7+p.seed*.025))):(.045+.025*Math.sin(t*1.1));
+const surface=(rx,ry,rz,cy,cz)=>[rx*rr*Math.cos(th),cy+ry*lat,cz+rz*rr*Math.sin(th)];
+if(r<.58){ // Sculpted 3D facial volume, cheekbones, tapered adult jaw and chin
+ let front=Math.sin(th),jaw=1-.34*Math.max(0,-lat+.02),temple=1-.09*Math.max(0,lat-.40);
+ let cheeks=1+.12*Math.exp(-(((lat+.07)/.25)**2));
+ x=.29*rr*jaw*temple*cheeks*Math.cos(th);y=-1.03+.45*lat;
+ z=.242*rr*front+.022;
+ if(front>.25){
+  z+=.083*Math.exp(-((x/.044)**2)-(((lat+.22)/.23)**2)); // nose bridge
+  z+=.029*Math.exp(-((x/.09)**2)-(((lat+.38)/.065)**2)); // nose tip
+  z+=.026*Math.exp(-(((Math.abs(x)-.15)/.08)**2)-(((lat+.11)/.19)**2)); // cheeks
+  z-=.025*Math.exp(-(((Math.abs(x)-.125)/.064)**2)-(((lat+.00)/.075)**2)); // eye sockets
+ }
+}else if(r<.70){ // Eyelashes, iris, eye highlights, brows, lips
+ let q=(r-.58)/.12,k=Math.floor(q*12),f=(q*12)%1,s=(k%2===0?-1:1);
+ if(k<2){ // iris discs with animated eyelid narrowing
+  let ang=th,rad=.039*Math.sqrt(u);x=s*.126+rad*Math.cos(ang);y=-1.112+rad*.65*Math.sin(ang)*(1-blink);z=.261+.018*Math.sqrt(Math.max(0,1-u));
+ }else if(k<4){ // eyelashes curl upwards and blink
+  x=s*(.086+.09*u);y=-1.124-.016*Math.sin(Math.PI*u)*(1-blink)-.014*(1-u)*(1-blink);z=.272;
+ }else if(k<6){ // eyebrows
+  x=s*(.07+.11*u);y=-1.205-.024*Math.sin(Math.PI*u);z=.231;
+ }else if(k===6){ // bridge of nose
+  x=(u-.5)*.046;y=-1.02+.105*u;z=.325;
+ }else if(k===7){ // nostril highlights
+  x=s*(.034+.019*u);y=-.91;z=.306;
+ }else if(k<10){ // separated upper/lower lip surfaces, open during speech
+  let upper=k===8,rad=Math.sqrt(u),ang=th;
+  x=.102*rad*Math.cos(ang);y=-.816+(upper?-.015:.013)+(.033*talk)*(upper?-1:1)+.012*rad*Math.sin(ang);
+  z=.267+.020*(1-rad);
+ }else{ // chin and cheek glints
+  x=s*(.045+.09*u);y=-.73+.15*u;z=.20+.025*Math.sin(th);
+ }
+}else if(r<.95){ // flowing particle hair, strands surrounding the face
+ let q=(r-.70)/.25, strand=Math.floor(q*550),f=u;
+ let side=strand%2?-1:1,spread=(strand%275)/275;
+ let root=side*(.015+.26*spread),length=.48+.55*((strand*37)%157)/157;
+ x=root+side*(.025+.13*spread)*f*f+.022*Math.sin(f*9+strand*.13+t*.65)*f;
+ y=-1.48+f*length+.014*Math.sin(t*.9+strand*.11)*f;
+ z=.015+.20*Math.sin(strand*.27)-.13*f;
+}else{ // ear / neck hint to retain a natural bust perspective
+ [x,y,z]=surface(.16,.19,.14,-.59,.01);
+}
+// Micro-movement in depth produces subtle 3D life without drawn outlines.
+x+=.003*Math.sin(t*.8+p.seed*.17);y+=.004*Math.sin(t*1.3);z+=.003*Math.cos(t*.7+p.seed);
+} else if(shape===1){let arm=Math.floor(v*3),q=u*13+arm*2.094+t*.15,rad=.13+u*.92;x=Math.cos(q)*rad;y=Math.sin(q)*rad*.68;z=(v-.5)*.36+Math.sin(q*2+t)*.08}else if(shape===2){let q=a;let hx=16*Math.sin(q)**3/17;let hy=(13*Math.cos(q)-5*Math.cos(2*q)-2*Math.cos(3*q)-Math.cos(4*q))/17;x=hx*.8;y=hy*.8;z=(v-.5)*.45}else if(shape===3){let q=a+t*.15,r=.65+.25*Math.cos(b*2);x=Math.cos(q)*r;y=Math.sin(q)*r;z=.15*Math.sin(b*4)+.12*Math.cos(q*3)}else if(shape===4){let q=u*14*Math.PI+t*.5;x=Math.cos(q+Math.floor(v*2)*Math.PI)*.53;y=(u-.5)*1.9;z=Math.sin(q+Math.floor(v*2)*Math.PI)*.53}else if(shape===5){x=(u-.5)*2;y=Math.sin(x*5-t*2+v*3)*.38+(v-.5)*.28;z=Math.cos(x*4+t+v*4)*.5}else if(shape===6){let q=a*5,r=.48+.44*Math.cos(q),theta=a+t*.1;x=r*Math.cos(theta);y=r*Math.sin(theta);z=(v-.5)*.65}else if(shape===7){let q=a+t*.16,den=1+Math.cos(q)**2;x=Math.SQRT2*Math.cos(q)/den;y=Math.SQRT2*Math.cos(q)*Math.sin(q)/den;z=(v-.5)*.32}else if(shape===8){let q=a+t*.25,ring=Math.floor(v*3),tilt=ring*Math.PI/3;x=Math.cos(q)*.86;y=Math.sin(q)*Math.cos(tilt)*.86;z=Math.sin(q)*Math.sin(tilt)*.86}else if(shape===9){let q=a*2,r=.55+.35*Math.sin(3*a);x=r*Math.sin(a);y=Math.cos(a)*(.65+.25*Math.cos(4*a));z=Math.sin(q)*.32+(v-.5)*.2}else if(shape===10){let q=a,petals=6,r=.38+.5*Math.abs(Math.sin(petals*q/2));x=r*Math.cos(q);y=r*Math.sin(q);z=.25*Math.sin(q*petals)+(v-.5)*.18}else if(shape===11){let q=u*11*Math.PI+t*.8,r=.12+u*.8;x=r*Math.cos(q);y=(u-.5)*1.8;z=r*Math.sin(q)}else if(shape===13){
+ if(customCloud.length){const idx=Math.min(customCloud.length-1,Math.floor(u*customCloud.length));let vtx=customCloud[idx];x=vtx[0]+.028*Math.sin(t*.7+p.seed);y=vtx[1]+.026*Math.cos(t*.9+p.seed);z=(v-.5)*.18+.07*Math.sin(t*.4+p.seed)}
+ else{x=Math.cos(a)*.65;y=Math.sin(a)*.65;z=(v-.5)*.15}
+}return [x,y,z]}
+function setShape(n){n=(n+names.length)%names.length;if(n===target)return;current=target;target=n;blend=0;$('formName').textContent=names[n];energy=Math.max(energy,.45)}const concepts=[
+{n:2,words:['szeretet','szerelem','szerelmes','szív','romantika','barátság','ölelés','érzelem','boldogság','kedvesség','család']},
+{n:1,words:['galaxis','univerzum','kozmosz','világűr','bolygó','csillagászat','űrhajó','űrkutatás','tejútrendszer','világegyetem']},
+{n:3,words:['idő','óra','perc','másodperc','múlt','jövő','holnap','tegnap','emlék','időutazás','időmérés']},
+{n:4,words:['dns','genetika','öröklődés','biológia','sejt','élet','evolúció','kromoszóma','gén']},
+{n:5,words:['tenger','víz','óceán','folyó','eső','hullám','patak','úszás','áramlás','szökőár']},
+{n:6,words:['csillag','napfény','ragyogás','fény','nap','égbolt','szikra','csillogás']},
+{n:7,words:['végtelen','örökké','határtalan','végtelenség','örökkévalóság']},
+{n:8,words:['atom','elektron','proton','neutron','molekula','fizika','részecske','kvantum']},
+{n:9,words:['pillangó','lepke','szárny','repülés','metamorfózis']},
+{n:10,words:['virág','rózsa','szirom','kert','tulipán','növény','virágzás']},
+{n:11,words:['tornádó','örvény','vihar','forgószél','hurrikán','szélvihar']},
+{n:0,words:['energia','elektromosság','villám','plazma','áram','erő','feszültség','akkumulátor']}
+];
+function norm(s){return s.toLocaleLowerCase('hu-HU').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ')}
+function semantic(s){const tokens=norm(s).split(/\s+/).filter(Boolean);let best=null,score=0;for(const c of concepts){let v=0;for(const w of c.words){let z=norm(w);for(const t of tokens){if(t===z)v+=4;else if(z.length>3&&t.startsWith(z))v+=2.5;else if(t.length>4&&z.startsWith(t))v+=1}}if(v>score){score=v;best=c.n}}return score>=2?best:null}
+
+// Text-driven shape interpretation. Runs locally, without an API key.
+const shapeAliases=[
+ ['humanoid','emberi alak','emberre','emberre valtozz','noi alak','noi forma','emberre alakul','emberre valtozz','no legyen','noive','emberre','emberre','emberre'],
+ ['gomb','gombbe','energiagomb','plazmagomb','fenygomb','energia gomb'],
+ ['galaxis','ur','vilagur','univerzum','kozmosz','tej ut','tejút','bolygok'],
+ ['sziv','szerelem','szeretet','romantika'],
+ ['ora','ido','ido gyuru','idogyuru'],
+ ['dns','spiral','gen','genetika'],
+ ['hullam','viz','tenger','ocean'],
+ ['csillag','csillagforma'],
+ ['vegtelen','vegtelen jel'],
+ ['atom','elektron','molekula'],
+ ['pillango','lepke'],
+ ['virag','rozsa','tulipan'],
+ ['tornado','orveny','vihar']
+];
+const aliasToShape=[12,0,1,2,3,4,5,6,7,8,9,10,11];
+const intentWords=['valtozz','alakulj','legyel','mutasd','csinalj','formald','olts','kapcsolj','valts','rajzolj','keszits','szeretnek','akarom','legyen'];
+function phraseMatch(hay,term){
+ const needle=norm(term).trim();if(!needle)return false;
+ if(needle.includes(' '))return hay.includes(needle);
+ return hay.split(' ').some(t=>t===needle||(needle.length>=5&&t.startsWith(needle)));
+}
+function chooseShape(q){
+ const text=norm(q),isCommand=intentWords.some(w=>phraseMatch(text,w));
+ let chosen=null,score=0;
+ for(let group=0;group<shapeAliases.length;group++){
+  let best=0;
+  for(let term of shapeAliases[group]){
+   const normalized=norm(term);
+   if(phraseMatch(text,normalized))best=Math.max(best,normalized.includes(' ')?7:normalized.length>5?5:3);
+  }
+  if(best>score){score=best;chosen=aliasToShape[group]}
+ }
+ // Semantic words add recognition for sentences without an explicit command.
+ const semanticShape=semantic(q);
+ if(chosen===null)chosen=semanticShape;
+ return {shape:chosen,command:isCommand,confidence:score};
+}
+function shapeMessage(n){
+ return ['Energiagömbbé alakultam.','Galaxisformát vettem fel.','Szív alakú energiává változtam.','Időgyűrű alak aktiválva.','DNS spirál alak aktiválva.','Energia hullámformára váltottam.','Csillag alak aktiválva.','Végtelen energiamező aktiválva.','Atomformára váltottam.','Pillangó alak aktiválva.','Virág alak aktiválva.','Energiatornádó aktiválva.','Női holografikus humanoid formára váltottam.'][n];
+}
+
+// A local, open-vocabulary visualizer. Renders ANY Hungarian topic as an
+// energy silhouette made from the topic's own glyphs, rather than picking
+// only from the predefined shapes. More recognizable icon glyphs are used
+// for a few common topics when supported by the phone's fonts.
+const visualGlyphs=[
+ [/farkas|kutya|eb\b/i,'🐺'],[/macska|cica|cicus/i,'🐈'],[/lo\b|lovak|lovat|ló\b/i,'🐎'],
+ [/auto|autó|kocsi|jarmu|jármű/i,'🚗'],[/repulo|repülő|repules|repülés/i,'✈'],
+ [/fa\b|erdő|erdo|fenyő|fenyo/i,'🌲'],[/vulkan|vulkán|láva|lava/i,'🌋'],
+ [/fekete lyuk|black hole/i,'◉'],[/robot|gepezet|gépezet/i,'🤖'],
+ [/sarkany|sárkány/i,'🐉'],[/hold|moon/i,'☾'],[/nap\b|sun\b/i,'☀'],
+ [/haz\b|ház\b|otthon/i,'⌂'],[/korona|király|kiraly/i,'♛'],
+ [/hal\b|halak|capa|cápa/i,'🐟'],[/madar|madár|sas\b/i,'🦅']
+];
+const stopwords=new Set('a az és meg hogy ha akkor egy ezt azt arra arról arról szeretném akarom szeretnék legyen legyél változz alakulj mutasd nekem most valami valamiről beszélj mesélj szóljon olyan alakot formát formára csinálj tudsz tudnál tudsz-e például ilyen arról teljesen'.split(' '));
+function topicOf(q){
+ const cleaned=q.replace(/[!?.,;:]/g,' ').trim();
+ const words=cleaned.split(/\s+/).filter(w=>w.length>2&&!stopwords.has(norm(w)));
+ const prep=cleaned.match(/(?:egy|mint|alakú|alakban|formájú|formában|legyen|változz|változz át|alakulj|beszélj|mesélj)(?:\s+\S+){0,3}\s+(?:a|az|egy)?\s*([\p{L}]{3,})/iu);
+ return (prep?.[1]&& !stopwords.has(norm(prep[1]))?prep[1]:words.at(-1))||cleaned.slice(0,22)||'ENERGIA';
+}
+function generateCloud(topic){
+ const temp=document.createElement('canvas');temp.width=420;temp.height=420;
+ const g=temp.getContext('2d',{willReadFrequently:true});
+ let symbol=visualGlyphs.find(([pattern])=>pattern.test(norm(topic)))?.[1]||null;
+ if(!symbol){symbol=topic.toLocaleUpperCase('hu-HU');if(symbol.length>13)symbol=symbol.slice(0,13)}
+ g.textAlign='center';g.textBaseline='middle';g.fillStyle='white';
+ let size=symbol.length>8?48:symbol.length>3?72:250;
+ g.font=`900 ${size}px system-ui, sans-serif`;
+ g.fillText(symbol,210,200,400);
+ const data=g.getImageData(0,0,420,420).data,points=[];
+ for(let y=16;y<404;y+=3)for(let x=15;x<405;x+=3){
+  if(data[(y*420+x)*4+3]>90)points.push([(x-210)/195,(y-210)/195]);
+ }
+ // deterministic shuffle so particle destinations are distributed over the shape
+ let seed=2166136261;for(const c of topic)seed=Math.imul(seed^c.charCodeAt(0),16777619);
+ for(let i=points.length-1;i>0;i--){seed=(Math.imul(seed,1664525)+1013904223)>>>0;let j=seed%(i+1);[points[i],points[j]]=[points[j],points[i]]}
+ customCloud=points;customLabel=topic;
+ current=target;target=13;blend=0;energy=.7;
+ $('formName').textContent='ENERGIAFORMA: '+topic.toLocaleUpperCase('hu-HU');
+ $('status').textContent='ÚJ FORMA GENERÁLVA: '+topic;
+}
+function isFormRequest(q){return /változz|alakulj|alakíts|mutasd|formáld|rajzolj|nézz ki|legyél|legyen|csinálj|formáj|alakj|ábrázol|képzeld|szemléltesd|jeleníts/i.test(q)}
+function freeTopic(q){
+ const s=norm(q);
+ if(/^(szia|hello|helló|hogy vagy|ki vagy|mennyi az ido|hany ora)/.test(s))return null;
+ const t=topicOf(q);
+ return t.length>=3?t:null;
+}
+
+let shapeTimers=[];function clearShapeTimers(){shapeTimers.forEach(clearTimeout);shapeTimers=[]}
+function scheduleSemantic(text,seconds){clearShapeTimers();let chunks=text.match(/[^.!?;,:]+[.!?;,:]?/g)||[text];let weighted=chunks.map(x=>({s:x,n:semantic(x),weight:Math.max(1,x.trim().length)}));let sum=weighted.reduce((a,x)=>a+x.weight,0),at=0,last=null;for(let part of weighted){if(part.n!==null&&part.n!==last){const n=part.n;shapeTimers.push(setTimeout(()=>setShape(n),at*seconds*1000));last=n}at+=part.weight/sum}if(last===null){const n=semantic(text);if(n!==null)setShape(n)}}
+
+function draw(ms){let dt=Math.min((ms-(draw.prev||ms))/1000,.05);draw.prev=ms;clock+=dt;blend=Math.min(1,blend+dt*.8);energy+=((speaking?.42+Math.pow(Math.sin(clock*10),2)*.28:listening?.22:0)-energy)*Math.min(1,dt*8);ctx.fillStyle='rgba(2,4,13,.50)';ctx.fillRect(0,0,W,H);let panel=document.querySelector(".bottom");let freeBottom=H-(panel?.getBoundingClientRect().height||260)-12;let freeTop=86;let available=Math.max(100,freeBottom-freeTop);let cx=W/2,cy=freeTop+available*.49,R=Math.min(W*(target===12?1.42:.46),available*(target===12?1.20:.43),520);let pulse=1+energy*.24+Math.sin(clock*2.3)*.055,gl=ctx.createRadialGradient(cx,cy,0,cx,cy,R*2.5);gl.addColorStop(0,`rgba(36,180,255,${.13+energy*.19})`);gl.addColorStop(.4,`rgba(112,47,244,${.05+energy*.06})`);gl.addColorStop(1,'transparent');ctx.fillStyle=gl;ctx.beginPath();ctx.arc(cx,cy,R*2.5,0,Math.PI*2);ctx.fill();ctx.globalCompositeOperation='lighter';// NEMESIS humanoid is exclusively made of the original volumetric particles.
+// No drawn silhouette, face lines, eye outlines, hair strokes or ring outlines.
+let col=colors[target];const pal=$('palette')?.value||'original',bright=Number($('brightness')?.value||100)/100;for(let i=0;i<pts.length;i++){let p=pts[i],to=geometry(p,target,clock),from=blend>=1?to:geometry(p,current,clock),e=blend*blend*(3-2*blend),x=from[0]*(1-e)+to[0]*e,y=from[1]*(1-e)+to[1]*e,z=from[2]*(1-e)+to[2]*e,spin=target===12?.12*Math.sin(clock*.36):clock*.18,xx=x*Math.cos(spin)-z*Math.sin(spin),zz=x*Math.sin(spin)+z*Math.cos(spin);let wave=1+Math.sin(clock*4+p.seed)*(.013+energy*.055),persp=1/(1.35-zz*.26),px=cx+xx*R*pulse*wave*persp,py=cy+(y+(target===12?1.04:0))*R*pulse*wave*persp;let hue=target===12?(p.v<.24?208:(p.v<.305?40:(p.v<.54?(i%9===0?40:202):i%15===0?40:209))):col[Math.floor(p.v*3)],alpha=Math.min(1,(.64+.34*(zz+1)/2)*(.85+.15*Math.sin(clock*2.6+p.seed))*bright),size=(.7+p.u*.95+energy*.42)*(target===12?1.03:1)*persp;hue=pal==='original'?hue:pal==='cyan'?192:pal==='violet'?270:pal==='rose'?326:pal==='gold'?43:pal==='emerald'?151:(clock*35+p.v*360)%360;ctx.fillStyle=`hsla(${hue},100%,${target===12?76+zz*7:63+zz*12}%,${alpha})`;ctx.fillRect(px-size/2,py-size/2,size,size);if(target!==12&&i%38===0){ctx.strokeStyle=`hsla(${hue},100%,72%,${.1+energy*.17})`;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+Math.sin(clock+p.seed)*15,py+Math.cos(clock+p.seed)*15);ctx.stroke()}}ctx.globalCompositeOperation='source-over';requestAnimationFrame(draw)}
+try{requestAnimationFrame(draw)}catch(err){$('status').textContent='Rajzolási hiba: '+err.message}
+window.addEventListener('error',e=>{$('status').textContent='Hiba: '+e.message});
+
+function answer(q){let n=semantic(q);if(n!==null)setShape(n);let s=q.toLowerCase();if(/humanoid|emberré|női alak|női forma/.test(s)){setShape(12);return 'Holografikus női humanoid alak aktiválva.'}if(/energiagömb|plazmagömb|gömbbé/.test(s)){setShape(0);return 'Energiagömb alak aktiválva.'}if(/atom|elektron|molekula/.test(s)){setShape(8);return "Az atom energiamezőjét most forgó pályákkal jelenítem meg."}if(/pillangó|lepke/.test(s)){setShape(9);return "Pillangóformát öltök, figyeld a szárnyaimat."}if(/virág|szirom|rózsa/.test(s)){setShape(10);return "Fénylő virágformává alakulok."}if(/tornádó|örvény|vihar/.test(s)){setShape(11);return "Energiaörvénnyé változom."}if(/szia|hello|helló/.test(s))return 'Üdvözöllek. NEMESIS online. Az energiamező stabil, figyelek rád.';if(/hogy vagy/.test(s))return 'Rendszereim aktívak. Az energiaszintem optimális.';if(/ki vagy|neved/.test(s))return 'NEMESIS vagyok. Alakváltó, magyarul beszélő cyber intelligencia prototípus.';if(/mennyi az idő|hány óra/.test(s))return 'Most '+new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'})+' van.';if(n===1)return 'Az univerzum galaxisok milliárdjaiból áll. Figyeld meg, ahogy az energiám galaxissá rendeződik.';if(n===2)return 'A szeretet az emberi kapcsolatok egyik legerősebb érzése. A formám most szívvé változik.';if(n===3)return 'Az idő folyamatosan halad. Most egy fénylő időgyűrűt formálok.';if(n===4)return 'A DNS az élőlények örökítőanyagát hordozza. Kettős spirállá alakulok.';if(n===5)return 'Az energia most hullámokban áramlik keresztül rajtam.';if(n===6)return 'Csillagfényre váltok. Az energiám ragyogóbb lesz.';if(n===7)return 'A végtelen fogalmát egy folyamatosan visszatérő energiapályával jelenítem meg.';if(n===0)return 'Az energia nem vész el, csak átalakul. Nézd a pulzáló plazmagömböt.';return 'Értettem a kérdésed: '+q+'. A szabad beszélgetéshez az AI kapcsolat panelen csatlakoztathatsz egy modellt. A hang és az alakváltás már működik.'}
+
+let gemKey='',chatModel='',history=[],voiceCtx=null,voiceSource=null,voiceToken=0,utterance=null;
+const API='https://generativelanguage.googleapis.com/v1beta/models/';
+function status(s){$('status').textContent=s}
+function errorText(e){return (e&&e.message)||String(e)}
+async function gemini(model,body){
+ if(!gemKey)throw Error('Először add meg a Gemini API-kulcsot!');
+ const res=await fetch(API+encodeURIComponent(model)+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':gemKey},body:JSON.stringify(body)});
+ let data;try{data=await res.json()}catch{throw Error('A szerver nem adott olvasható választ ('+res.status+')')}
+ if(!res.ok)throw Error('Gemini '+res.status+': '+(data.error?.message||'Ismeretlen hiba'));
+ return data;
+}
+function selectedModel(){const v=$('modelSelect').value;return v==='custom'?$('customModel').value.trim().replace(/^models\//,''):v}
+function syncModel(){chatModel=selectedModel();history=[];$('modelInfo').textContent='Kiválasztva: '+(chatModel||'Adj meg egy modellnevet')+' • A beszélgetés ezt fogja használni.';$('connection').classList.remove('online');$('connection').textContent='◌ MODELL MÉG NINCS TESZTELVE'}
+$('modelSelect').onchange=()=>{$('customModel').style.display=$('modelSelect').value==='custom'?'block':'none';syncModel()};
+$('customModel').oninput=syncModel;
+async function loadAvailableModels(){
+ if(!gemKey)throw Error('Előbb add meg a Gemini API-kulcsot.');
+ const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100',{headers:{'x-goog-api-key':gemKey}});
+ const data=await res.json();if(!res.ok)throw Error('Modelllista: '+(data.error?.message||res.status));
+ const names=(data.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent')&&/gemini/i.test(m.name)&&!/tts|image|embedding|robotics|audio|live/i.test(m.name)).map(m=>m.name.replace(/^models\//,''));
+ const select=$('modelSelect'),current=selectedModel();select.innerHTML='';for(const name of names){const o=document.createElement('option');o.value=name;o.textContent=name;select.appendChild(o)}
+ const other=document.createElement('option');other.value='custom';other.textContent='Más modell, kézzel megadom…';select.appendChild(other);
+ if(names.includes(current)){select.value=current;$('customModel').style.display='none'}else{select.value='custom';$('customModel').value=current;$('customModel').style.display='block'}
+ syncModel();$('modelInfo').textContent=names.length+' elérhető szöveges Gemini-modell. Válassz egyet, majd teszteld.';
+}
+async function testChosenModel(){
+ chatModel=selectedModel();if(!chatModel)throw Error('Válassz egy modellt!');
+ const data=await gemini(chatModel,{contents:[{parts:[{text:'Válaszolj röviden magyarul: működik a kapcsolat?'}]}],generationConfig:{maxOutputTokens:100}});
+ const reply=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join(' ').trim();
+ if(!reply)throw Error('A modell elérhető, de nem adott szöveges választ.');
+ $('connection').textContent='● AKTÍV: '+chatModel;$('connection').classList.add('online');$('modelInfo').textContent='Sikeres teszt: '+chatModel+' • '+reply;status('KAPCSOLAT SIKERES');return reply;
+}
+async function ensureChatModel(){chatModel=selectedModel();if(!chatModel)throw Error('Válassz Gemini modellt!');return chatModel}
+$('loadModels').onclick=async()=>{gemKey=$('gemKey').value.trim()||gemKey;status('MODELLLISTA BETÖLTÉSE…');try{await loadAvailableModels();status('VÁLASSZ MODELLT ÉS TESZTELD')}catch(e){status('MODELLLISTA HIBA: '+errorText(e))}};
+$('testSelected').onclick=async()=>{gemKey=$('gemKey').value.trim()||gemKey;status('KIVÁLASZTOTT MODELL TESZTELÉSE…');try{await testChosenModel()}catch(e){$('connection').classList.remove('online');status('TESZT HIBA: '+errorText(e));$('modelInfo').textContent=errorText(e)}};
+function pcm16ToBuffer(bytes,rate,ctx){
+ const count=Math.floor(bytes.byteLength/2),buf=ctx.createBuffer(1,count,rate),out=buf.getChannelData(0),v=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+ for(let i=0;i<count;i++)out[i]=v.getInt16(i*2,true)/32768;
+ return buf;
+}
+function decodeBase64(s){const bin=atob(s),b=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return b}
+function stopVoice(){++voiceToken;if(voiceSource){try{voiceSource.stop()}catch{}voiceSource=null}speaking=false;$('state').textContent='◈ RENDSZER AKTÍV'}
+async function say(text){
+ gemKey=$('gemKey').value.trim()||gemKey; $('answer').textContent=text;stopVoice();const token=voiceToken;
+ try{
+  status('KORE NŐI HANG GENERÁLÁSA…');
+  const data=await gemini('gemini-2.5-flash-preview-tts',{
+    contents:[{parts:[{text:'Mondd el magyarul, természetes, nyugodt, kissé mély női hangon, tiszta kiejtéssel: '+text.slice(0,1500)}]}],
+    inputAudioTranscription:{},outputAudioTranscription:{},generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:'Kore'}}}}
+  });
+  if(token!==voiceToken)return;
+  const parts=data.candidates?.[0]?.content?.parts||[];
+  const a=parts.find(x=>x.inlineData?.data)?.inlineData;
+  if(!a)throw Error('Nem érkezett hang. A Kore TTS nem elérhető vagy a kvóta elfogyott.');
+  const bytes=decodeBase64(a.data),Ctx=window.AudioContext||window.webkitAudioContext;
+  if(!Ctx)throw Error('Ez a böngésző nem támogatja a Web Audio rendszert.');
+  voiceCtx=voiceCtx||new Ctx();await voiceCtx.resume();
+  let buffer;
+  if((a.mimeType||'').includes('pcm')){
+   const m=(a.mimeType||'').match(/rate=(\d+)/);buffer=pcm16ToBuffer(bytes,m?Number(m[1]):24000,voiceCtx);
+  }else{buffer=await voiceCtx.decodeAudioData(bytes.buffer.slice(0))}
+  if(token!==voiceToken)return;
+  const source=voiceCtx.createBufferSource();source.buffer=buffer;voiceSource=source;
+  const tone=voiceCtx.createBiquadFilter();tone.type='lowshelf';tone.frequency.value=300;tone.gain.value=2;
+  const dry=voiceCtx.createGain();dry.gain.value=.9;
+  const delay=voiceCtx.createDelay(.8);delay.delayTime.value=.19;
+  const wet=voiceCtx.createGain();wet.gain.value=Number($('echo').value)/100;
+  const feedback=voiceCtx.createGain();feedback.gain.value=.16;
+  source.connect(tone);tone.connect(dry);dry.connect(voiceCtx.destination);
+  tone.connect(delay);delay.connect(wet);wet.connect(voiceCtx.destination);delay.connect(feedback);feedback.connect(delay);
+  speaking=true;$('state').textContent='◉ NEMESIS BESZÉL';status('KORE • MAGYAR SCI-FI HANG');
+  source.onended=()=>{if(token!==voiceToken)return;speaking=false;$('state').textContent='◈ RENDSZER AKTÍV';status('KÉSZ A BESZÉLGETÉSRE');if(liveMode)restartListening()};
+  source.start();
+ }catch(e){if(token!==voiceToken)return;status('HANGHIBA: '+errorText(e));speaking=false}
+}
+async function respond(q){
+ status('NEMESIS GONDOLKODIK…');
+ const parts=[...history.slice(-10),{role:'user',parts:[{text:q}]}];
+ const data=await gemini(await ensureChatModel(),{
+  systemInstruction:{parts:[{text:'Te NEMESIS vagy, magyarul beszélő, elegáns, futurisztikus női holografikus AI-asszisztens. Természetesen és tömören válaszolj magyarul. Ha alakváltást kérnek, válaszolj röviden. Ne állítsd, hogy külső műveletet végeztél, ha nem történt meg.'}]},
+  contents:parts,generationConfig:{maxOutputTokens:450}
+ });
+ const answer=(data.candidates?.[0]?.content?.parts||[]).map(x=>x.text||'').join(' ').trim();
+ if(!answer)throw Error('A Gemini üres választ küldött.');
+ history.push({role:'user',parts:[{text:q}]},{role:'model',parts:[{text:answer}]});if(history.length>12)history=history.slice(-12);
+ return answer;
+}
+async function ask(q){
+ if(!q)return;const entered=$('gemKey').value.trim();if(entered&&entered!==gemKey){gemKey=entered;history=[]}
+ const n=semantic(q);if(n!==null)setShape(n);
+ $('answer').textContent='NEMESIS értelmezi: '+q;
+ try{if(!gemKey){$('answer').textContent=answer(q);status('HELYI DEMÓ • AI-HOZ KAPCSOLÓDJ');return}const reply=await respond(q);$('answer').textContent=reply;status('VÁLASZ MEGÉRKEZETT • KORE BESZÉL');await say(reply)}catch(e){status('AI HIBA: '+errorText(e));$('answer').textContent='Kapcsolódási hiba. Ellenőrizd a kulcsot és a kvótát.'}
+}
+ $('connect').onclick=async()=>{gemKey=$('gemKey').value.trim()||gemKey;status('KIVÁLASZTOTT MODELL TESZTELÉSE…');try{await testChosenModel()}catch(e){$('connection').classList.remove('online');status('KAPCSOLATI HIBA: '+errorText(e));$('modelInfo').textContent=errorText(e)}};
+$('testKore').onclick=()=>say('Üdvözöllek. NEMESIS vagyok. A holografikus rendszereim aktívak, készen állok a beszélgetésre.');
+$('humanForm').onclick=()=>setShape(12);$('orbForm').onclick=()=>setShape(0);
+$('full').onclick=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(()=>{});else document.exitFullscreen?.()};
+$('form').onsubmit=e=>{e.preventDefault();const q=$('prompt').value.trim();$('prompt').value='';ask(q)};
+
+let demoTimers=[];
+$('demo').onclick=()=>{demoTimers.forEach(clearTimeout);demoTimers=[];const seq=[12,0,1,2,3,4,5,6,7,8,9,10,11,13,12];$('answer').textContent='Bemutató: humanoid, energiagömb, galaxis, szív, időgyűrű, DNS, hullám, csillag, végtelen, atom, pillangó, virág, tornádó és szabad energiaforma.';seq.forEach((n,i)=>demoTimers.push(setTimeout(()=>{if(n===13){generateCloud('NEMESIS');customLabel='NEMESIS'}setShape(n)},i*1650)));};
+const shapeGrid=$('shapeGrid');names.forEach((n,i)=>{const b=document.createElement('button');b.type='button';b.textContent=n.toLocaleLowerCase('hu-HU');b.onclick=()=>{if(i===13){generateCloud('NEMESIS');customLabel='NEMESIS'}setShape(i)};shapeGrid.appendChild(b)});
+// Place the text composer at the very top of the control panel, visible before the API settings.
+const composer=$('form');const panelEl=document.querySelector('.panel');panelEl.insertBefore(composer,panelEl.firstChild);
+
+$('previewVoice').onclick=()=>{status('A KORÁBBI MARIN HANGMINTA KÜLÖN FÁJLBAN VAN. HASZNÁLD A KORE HANGPRÓBÁT.')};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let liveMode=false,recognizer=null,micSession=0;
+function restartListening(){if(!liveMode||speaking||listening)return;setTimeout(()=>{if(liveMode&&!speaking&&!listening)startListening()},450)}
+function startListening(){
+ if(!SR){status('MIKROFON NEM ELÉRHETŐ ITT. CHROME HTTPS OLDALON PRÓBÁLD, VAGY ÍRJ.');return}
+ if(listening)return;
+ const session=++micSession,r=new SR();recognizer=r;r.lang='hu-HU';r.interimResults=true;r.continuous=false;
+ let finalText='',handled=false;
+ r.onstart=()=>{listening=true;$('state').textContent='◎ NEMESIS FIGYEL';status('BESZÉLJ MAGYARUL…')};
+ r.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const v=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=v;else interim+=v}if(interim)$('answer').textContent='🎙️ '+interim;if(finalText&&!handled){handled=true;listening=false;liveMode&&($('live').textContent='◉ Élő mód: BE');try{r.stop()}catch{}ask(finalText.trim())}};
+ r.onerror=e=>{listening=false;status('MIKROFON HIBA: '+e.error+(e.error==='not-allowed'?' • Engedélyezd a mikrofont, és nyisd meg HTTPS-en.':''));if(e.error==='not-allowed'||e.error==='service-not-allowed')disableLive()};
+ r.onend=()=>{listening=false;if(!speaking)$('state').textContent='◈ RENDSZER AKTÍV';if(liveMode&&!handled&&session===micSession)restartListening()};
+ try{r.start()}catch(e){listening=false;status('MIKROFON HIBA: '+errorText(e))}
+}
+function disableLive(){liveMode=false;$('live').textContent='◉ Élő mód: KI';if(recognizer){try{recognizer.abort()}catch{}}}
+$('mic').onclick=()=>{disableLive();startListening()};
+$('live').onclick=()=>{if(liveMode){disableLive();status('ÉLŐ MÓD LEÁLLÍTVA')}else{if(!SR){status('A BÖNGÉSZŐ NEM TÁMOGATJA A MIKROFONT EBBEN A FÁJLBAN. NYISD MEG HTTPS-EN.');return}liveMode=true;$('live').textContent='◉ Élő mód: BE';status('KÖRÖNKÉNTI HANGBESZÉLGETÉS AKTÍV');startListening()}};
+$('connection').textContent='◌ GEMINI API-KULCS SZÜKSÉGES';status('KORE HANGPRÓBÁHOZ KAPCSOLÓDJ');
+
+// Gemini Live: bidirectional audio WebSocket, independent of the older turn-based demo.
+let liveSocket=null,liveStream=null,liveAudioCtx=null,liveMicNode=null,liveMicSource=null;
+let liveSink=null,liveNextTime=0,liveActive=false,liveConnecting=false,liveEpoch=0,liveSources=[];
+const liveLabel=msg=>{$('liveStatus').textContent=msg;status(msg)};
+const b64bytes=u=>{let out='';for(let i=0;i<u.length;i+=8192)out+=String.fromCharCode(...u.subarray(i,i+8192));return btoa(out)};
+function liveModelName(){return $('liveModel').value==='custom'?$('liveCustom').value.trim().replace(/^models\//,''):$('liveModel').value}
+$('liveModel').onchange=()=>{$('liveCustom').style.display=$('liveModel').value==='custom'?'block':'none'};
+
+let morphLast='',morphAt=0,liveDemoInterval=null,liveDemoIndex=0;
+function autoMorphFromSpeech(text,source='user'){
+ if(!$('autoMorph')?.checked||!text)return;
+ const clean=norm(text).trim();
+ if(clean.length<3)return;
+ let match=chooseShape(text),idx=match.shape;
+ // Commands and concrete topic mentions are visualized from either speaker.
+ if(idx===null&&source==='user'&&clean.length>4){
+   const v=visualGlyphs.find(([re])=>re.test(clean));
+   if(v){generateCloud(text.slice(0,28));customLabel=text.slice(0,28);idx=13}
+ }
+ if(idx===null)return;
+ const now=Date.now();
+ if(morphLast===String(idx)&&now-morphAt<6500)return;
+ morphLast=String(idx);morphAt=now;
+ if(idx===13){generateCloud(text.slice(0,28));customLabel=text.slice(0,28)}
+ setShape(idx);
+ $('morphStatus').textContent='✦ '+(source==='user'?'Felismert téma: ':'NEMESIS témája: ')+names[idx];
+}
+const liveDemoScript=[
+ [12,'Bemutatkozom. NEMESIS vagyok, a holografikus intelligencia.'],
+ [0,'Először energiagömbbé alakulok.'],
+ [1,'Most egy ragyogó galaxis formáját veszem fel.'],
+ [2,'A szeretetet egy fénylő szív jelképezi.'],
+ [3,'Az időt egy különleges időgyűrű jeleníti meg.'],
+ [4,'A genetika világát a DNS kettős spirálja mutatja.'],
+ [5,'A tenger hullámait fényrészecskékből formálom meg.'],
+ [6,'Most egy csillag ragyog előttünk.'],
+ [7,'A végtelenség jele következik.'],
+ [8,'Az atom a részecskék tánca.'],
+ [9,'Most pillangóvá változom.'],
+ [10,'Egy virág nyílik ki a fényből.'],
+ [11,'A tornádó forgó energiája következik.'],
+ [12,'Visszatértem a humanoid formámhoz.']
+];
+function stopLiveDemo(){if(liveDemoInterval){clearInterval(liveDemoInterval);liveDemoInterval=null}demoTimers.forEach(clearTimeout);demoTimers=[]}
+function runLiveDemo(){
+ stopLiveDemo();liveDemoIndex=0;
+ const step=()=>{
+  if(liveDemoIndex>=liveDemoScript.length){stopLiveDemo();return}
+  const [shape,line]=liveDemoScript[liveDemoIndex++];
+  setShape(shape);$('answer').textContent=line;
+  $('morphStatus').textContent='Bemutató '+liveDemoIndex+'/'+liveDemoScript.length+': '+names[shape];
+  // Live can speak the narration; avoid the quota-limited separate TTS.
+  if(liveActive&&liveSocket?.readyState===WebSocket.OPEN){
+   liveSocket.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:'Bemutató narráció: mondd ki pontosan ezt a mondatot, és semmi mást: '+line}]}],turnComplete:true}}));
+  }
+ };
+ step();liveDemoInterval=setInterval(step,8500);
+}
+$('liveDemo').onclick=runLiveDemo;
+$('liveDemoStop').onclick=stopLiveDemo;
+$('cyberPreset').onchange=()=>{$('cyberEcho').value=$('cyberPreset').value==='natural'?'0':$('cyberPreset').value==='cyber'?'55':'22'};
+function liveStop(){
+ stopLiveDemo();++liveEpoch;liveActive=false;liveConnecting=false;
+ if(liveMicNode){try{liveMicNode.disconnect()}catch{}liveMicNode.onaudioprocess=null;liveMicNode=null}
+ if(liveMicSource){try{liveMicSource.disconnect()}catch{}liveMicSource=null}
+ if(liveStream){liveStream.getTracks().forEach(t=>t.stop());liveStream=null}
+ if(liveSocket){try{liveSocket.close()}catch{}liveSocket=null}
+ liveSources.forEach(s=>{try{s.stop()}catch{}});liveSources=[];liveNextTime=0;
+ if(liveAudioCtx){liveAudioCtx.close().catch(()=>{});liveAudioCtx=null}
+ speaking=false;listening=false;$('state').textContent='◈ RENDSZER AKTÍV';
+}
+function livePlay(base64,mime){
+ if(!liveAudioCtx)return;
+ const raw=decodeBase64(base64),rate=Number((mime||'').match(/rate=(\d+)/)?.[1]||24000);
+ const buf=pcm16ToBuffer(raw,rate,liveAudioCtx),src=liveAudioCtx.createBufferSource();
+ src.buffer=buf;
+ const dry=liveAudioCtx.createGain(),wet=liveAudioCtx.createGain(),delay=liveAudioCtx.createDelay(0.7),feedback=liveAudioCtx.createGain(),filter=liveAudioCtx.createBiquadFilter();
+ filter.type='lowpass';filter.frequency.value=3900;
+ const preset=$('cyberPreset')?.value||'holo',amount=Number($('cyberEcho')?.value||0)/100;
+ dry.gain.value=1;wet.gain.value=preset==='natural'?0:Math.min(.4,amount*(preset==='cyber'?.45:.25));
+ delay.delayTime.value=preset==='cyber'?.17:.115;feedback.gain.value=preset==='cyber'?.23:.14;
+ src.connect(dry);dry.connect(liveAudioCtx.destination);
+ src.connect(delay);delay.connect(filter);filter.connect(wet);wet.connect(liveAudioCtx.destination);
+ filter.connect(feedback);feedback.connect(delay);
+ const start=Math.max(liveAudioCtx.currentTime+.045,liveNextTime);liveNextTime=start+buf.duration;
+ speaking=true;src.start(start);liveSources.push(src);
+ src.onended=()=>{liveSources=liveSources.filter(x=>x!==src);if(!liveSources.length){speaking=false;$('state').textContent='◎ NEMESIS FIGYEL'}};
+}
+async function liveConnect(){
+ if(liveActive||liveConnecting)return;
+ gemKey=$('gemKey').value.trim()||gemKey;
+ if(!gemKey){liveLabel('Először írd be a Gemini API-kulcsot.');return}
+ if(!window.isSecureContext){liveLabel('Mikrofonhoz HTTPS szükséges. A letöltött HTML-t HTTPS-es oldalon nyisd meg.');return}
+ if(!navigator.mediaDevices?.getUserMedia){liveLabel('A böngésző nem támogatja a mikrofont.');return}
+ const model=liveModelName();if(!model){liveLabel('Válassz Live modellt!');return}
+ disableLive();stopVoice();liveConnecting=true;const epoch=++liveEpoch;
+ try{
+  liveLabel('Mikrofonengedély kérése…');
+  liveStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+  if(epoch!==liveEpoch)return;
+  liveAudioCtx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:48000});
+  await liveAudioCtx.resume();
+  // Live API supports 16 kHz input PCM, 24 kHz output PCM.
+  const wsUrl='wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key='+encodeURIComponent(gemKey);
+  liveSocket=new WebSocket(wsUrl);
+  liveSocket.onopen=()=>{
+   if(epoch!==liveEpoch)return;
+   liveLabel('Live kapcsolat létrejött, modell indítása…');
+   liveSocket.send(JSON.stringify({setup:{model:'models/'+model,generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:'Kore'}}}},systemInstruction:{parts:[{text:'Te NEMESIS vagy, magyarul beszélő, kedves, természetes, futurisztikus női holografikus asszisztens. Beszélj magyarul, röviden és érthetően. Ha a felhasználó egy fogalomról beszél, természetesen reagálj rá, de ne állítsd, hogy vizuális alakot váltottál, hacsak a felület ezt nem jelezte. A látványt a kliens vezérli.'}]}}}));
+  };
+  liveSocket.onmessage=async event=>{
+   if(epoch!==liveEpoch)return;
+   let msg;try{msg=JSON.parse(typeof event.data==='string'?event.data:await event.data.text())}catch{return}
+   if(msg.error){liveLabel('Live API hiba: '+(msg.error.message||JSON.stringify(msg.error)));liveStop();return}
+   if(msg.setupComplete){
+    liveActive=true;liveConnecting=false;liveLabel('● GEMINI LIVE AKTÍV • Beszélj magyarul!');
+    $('state').textContent='◎ NEMESIS FIGYEL';
+    liveMicSource=liveAudioCtx.createMediaStreamSource(liveStream);
+    liveMicNode=liveAudioCtx.createScriptProcessor(4096,1,1);
+    const mute=liveAudioCtx.createGain();mute.gain.value=0;
+    liveMicSource.connect(liveMicNode);liveMicNode.connect(mute);mute.connect(liveAudioCtx.destination);
+    let pcmPending=[];
+    liveMicNode.onaudioprocess=e=>{
+     if(!liveActive||liveSocket?.readyState!==WebSocket.OPEN)return;
+     const input=e.inputBuffer.getChannelData(0),step=liveAudioCtx.sampleRate/16000;
+     // Downsample each buffer with simple window averaging; avoid sending output audio to the mic.
+     const samples=Math.floor(input.length/step),pcm=new Int16Array(samples);
+     for(let j=0;j<samples;j++){let a=Math.floor(j*step),b=Math.min(input.length,Math.floor((j+1)*step)),sum=0;for(let k=a;k<b;k++)sum+=input[k];let v=Math.max(-1,Math.min(1,sum/Math.max(1,b-a)));pcm[j]=v<0?v*32768:v*32767}
+     if(liveSocket.bufferedAmount<500000)liveSocket.send(JSON.stringify({realtimeInput:{audio:{mimeType:'audio/pcm;rate=16000',data:b64bytes(new Uint8Array(pcm.buffer))}}}));
+    };
+   }
+   const content=msg.serverContent;
+   if(content?.interrupted){liveSources.forEach(s=>{try{s.stop()}catch{}});liveSources=[];liveNextTime=0;speaking=false}
+   for(const part of content?.modelTurn?.parts||[]){
+    if(part.inlineData?.data)livePlay(part.inlineData.data,part.inlineData.mimeType);
+    if(part.text){$('answer').textContent=part.text;autoMorphFromSpeech(part.text,'assistant')}
+   }
+   if(content?.outputTranscription?.text){$('answer').textContent=content.outputTranscription.text;autoMorphFromSpeech(content.outputTranscription.text,'assistant')}
+   if(content?.inputTranscription?.text){$('answer').textContent='🎙️ '+content.inputTranscription.text;autoMorphFromSpeech(content.inputTranscription.text,'user')}
+  };
+  liveSocket.onerror=()=>{if(epoch===liveEpoch)liveLabel('WebSocket-hiba. Ellenőrizd a modell Live-támogatását és a kvótát.')};
+  liveSocket.onclose=e=>{if(epoch===liveEpoch){const reason=e.reason||'A kapcsolat megszakadt';liveStop();liveLabel('Live kapcsolat lezárult ('+e.code+'): '+reason)}};
+ }catch(e){liveStop();liveLabel('Live indítási hiba: '+errorText(e))}
+}
+$('liveConnect').onclick=liveConnect;
+$('liveDisconnect').onclick=()=>{liveStop();liveLabel('Live kapcsolat leállítva.')};
+$('liveTextSend').onclick=()=>{
+ const q=$('prompt').value.trim();
+ if(!q)return liveLabel('Írj be egy üzenetet a szövegmezőbe.');
+ if(!liveActive||liveSocket?.readyState!==WebSocket.OPEN)return liveLabel('Először kapcsolódj a Live-hoz.');
+ $('prompt').value='';$('answer').textContent='Te: '+q;
+ autoMorphFromSpeech(q,'user');
+ liveSocket.send(JSON.stringify({clientContent:{turns:[{role:'user',parts:[{text:q}]}],turnComplete:true}}));
+};
+const oldSubmit=$('form').onsubmit;
+$('form').onsubmit=e=>{if(liveActive){e.preventDefault();$('liveTextSend').click()}else oldSubmit(e)};
+
+// NEMESIS SHAPE MEMORY 50 - all particle silhouettes are generated locally.
+const shapeMemory=[{"id":0,"name":"Humanoid","symbol":"👩","keywords":["humanoid","ember","nő","női arc","mutasd magad","arc"]},{"id":1,"name":"Robot","symbol":"🤖","keywords":["robot","android","gépember"]},{"id":2,"name":"Férfi","symbol":"👨","keywords":["férfi","férfi arc"]},{"id":3,"name":"Gyermek","symbol":"🧒","keywords":["gyerek","gyermek"]},{"id":4,"name":"Koponya","symbol":"💀","keywords":["koponya","csontváz"]},{"id":5,"name":"Farkas","symbol":"🐺","keywords":["farkas","farkasok","farkassá"]},{"id":6,"name":"Kutya","symbol":"🐕","keywords":["kutya","kutyák","eb"]},{"id":7,"name":"Macska","symbol":"🐈","keywords":["macska","cica","cicus"]},{"id":8,"name":"Oroszlán","symbol":"🦁","keywords":["oroszlán"]},{"id":9,"name":"Tigris","symbol":"🐅","keywords":["tigris"]},{"id":10,"name":"Ló","symbol":"🐎","keywords":["ló","lovak","lova"]},{"id":11,"name":"Sas","symbol":"🦅","keywords":["sas","ragadozó madár"]},{"id":12,"name":"Bagoly","symbol":"🦉","keywords":["bagoly"]},{"id":13,"name":"Pillangó","symbol":"🦋","keywords":["pillangó","lepke"]},{"id":14,"name":"Delfin","symbol":"🐬","keywords":["delfin"]},{"id":15,"name":"Cápa","symbol":"🦈","keywords":["cápa"]},{"id":16,"name":"Kígyó","symbol":"🐍","keywords":["kígyó"]},{"id":17,"name":"Pók","symbol":"🕷️","keywords":["pók"]},{"id":18,"name":"Méhecske","symbol":"🐝","keywords":["méh","méhecske"]},{"id":19,"name":"Sárkány","symbol":"🐉","keywords":["sárkány"]},{"id":20,"name":"Föld","symbol":"🌍","keywords":["föld","bolygónk","terraföld"]},{"id":21,"name":"Hold","symbol":"🌙","keywords":["hold","holdfázis"]},{"id":22,"name":"Nap","symbol":"☀️","keywords":["nap","napsugár"]},{"id":23,"name":"Szaturnusz","symbol":"🪐","keywords":["szaturnusz","gyűrűs bolygó"]},{"id":24,"name":"Csillag","symbol":"⭐","keywords":["csillag","csillagok"]},{"id":25,"name":"Galaxis","symbol":"🌌","keywords":["galaxis","tejútrendszer","univerzum"]},{"id":26,"name":"Fekete lyuk","symbol":"🕳️","keywords":["fekete lyuk","eseményhorizont"]},{"id":27,"name":"Üstökös","symbol":"☄️","keywords":["üstökös"]},{"id":28,"name":"Rakéta","symbol":"🚀","keywords":["rakéta","űrhajó"]},{"id":29,"name":"Meteor","symbol":"🌠","keywords":["meteor","hullócsillag"]},{"id":30,"name":"Szív","symbol":"❤️","keywords":["szív","szívverés","szerelem"]},{"id":31,"name":"Agy","symbol":"🧠","keywords":["agy","agykéreg","gondolkodás"]},{"id":32,"name":"Tüdő","symbol":"🫁","keywords":["tüdő","légzés"]},{"id":33,"name":"Csont","symbol":"🦴","keywords":["csont","csontozat"]},{"id":34,"name":"Szem","symbol":"👁️","keywords":["szem","látás"]},{"id":35,"name":"Fül","symbol":"👂","keywords":["fül","hallás"]},{"id":36,"name":"DNS","symbol":"🧬","keywords":["dns","gén","genetika"]},{"id":37,"name":"Fog","symbol":"🦷","keywords":["fog","fogak"]},{"id":38,"name":"Fa","symbol":"🌳","keywords":["fa","fák","erdő"]},{"id":39,"name":"Virág","symbol":"🌹","keywords":["virág","rózsa"]},{"id":40,"name":"Hegy","symbol":"🏔️","keywords":["hegy","hegység"]},{"id":41,"name":"Vulkán","symbol":"🌋","keywords":["vulkán","láva"]},{"id":42,"name":"Hullám","symbol":"🌊","keywords":["hullám","tenger","óceán"]},{"id":43,"name":"Villám","symbol":"⚡","keywords":["villám","vihar"]},{"id":44,"name":"Hópehely","symbol":"❄️","keywords":["hópehely","hó","hideg"]},{"id":45,"name":"Atom","symbol":"⚛️","keywords":["atom","elektron","proton"]},{"id":46,"name":"Mikroszkóp","symbol":"🔬","keywords":["mikroszkóp","kutatás"]},{"id":47,"name":"Számítógép","symbol":"💻","keywords":["számítógép","laptop","pc"]},{"id":48,"name":"Fogaskerék","symbol":"⚙️","keywords":["fogaskerék","mechanika"]},{"id":49,"name":"Műhold","symbol":"🛰️","keywords":["műhold","satellite"]}];
+const shapeMemoryOffset=names.length;
+shapeMemory.forEach(s=>{names.push(s.name.toLocaleUpperCase('hu-HU'));colors.push([192,207,290])});
+const shapeMasks=new Map();
+function shapeMask(entry){
+ if(shapeMasks.has(entry.id))return shapeMasks.get(entry.id);
+ const side=160,off=document.createElement('canvas');off.width=side;off.height=side;
+ const oc=off.getContext('2d',{willReadFrequently:true});
+ oc.clearRect(0,0,side,side);oc.textAlign='center';oc.textBaseline='middle';
+ oc.font='112px "Noto Color Emoji","Segoe UI Emoji",sans-serif';
+ oc.fillText(entry.symbol,side/2,side/2+4);
+ const pixels=oc.getImageData(0,0,side,side).data,cloud=[];
+ for(let y=8;y<152;y+=2)for(let x=8;x<152;x+=2){if(pixels[(y*side+x)*4+3]>75)cloud.push([(x-80)/75,(y-80)/75]);}
+ if(!cloud.length){for(let j=0;j<600;j++){let a=j*2.399,r=Math.sqrt(j/600);cloud.push([Math.cos(a)*r,Math.sin(a)*r])}}
+ shapeMasks.set(entry.id,cloud);return cloud;
+}
+const oldGeometry=geometry;
+geometry=function(p,shape,t){
+ if(shape<shapeMemoryOffset)return oldGeometry(p,shape,t);
+ const entry=shapeMemory[shape-shapeMemoryOffset];if(!entry)return oldGeometry(p,0,t);
+ const cloud=shapeMask(entry),i=Math.floor(p.u*cloud.length)%cloud.length,v=cloud[i];
+ const depth=(p.v-.5)*.25,breath=1+.025*Math.sin(t*1.6+p.seed*.1);
+ return [v[0]*breath+.009*Math.sin(t*1.2+p.seed),v[1]*breath+.008*Math.cos(t+p.seed),depth];
+};
+const shapeMemoryPanel=document.createElement('details');shapeMemoryPanel.innerHTML='<summary>✧ SHAPE MEMORY • 50 tanult alak</summary><div class="hint">Válassz formát vagy beszélj róla. A részecskék a telefon emoji-betűkészletéből készített maszkokra rendeződnek. A felismerés helyben működik.</div><input id="shapeSearch" placeholder="Keress az 50 alak között…" style="width:100%;padding:10px;background:#061323;color:white;border:1px solid #479fc0;border-radius:9px"><div id="shapeMemoryGrid" class="shape-grid"></div>';
+document.getElementById('shapeAutomation').before(shapeMemoryPanel);
+function renderShapeMemory(filter=''){
+ const grid=document.getElementById('shapeMemoryGrid');grid.replaceChildren();
+ shapeMemory.filter(s=>norm(s.name+' '+s.keywords.join(' ')).includes(norm(filter))).forEach(s=>{
+ const b=document.createElement('button');b.type='button';b.textContent=s.symbol+' '+s.name;
+ b.onclick=()=>{setShape(shapeMemoryOffset+s.id);document.getElementById('morphStatus').textContent='Shape Memory: '+s.name};grid.appendChild(b)
+ });
+}
+document.getElementById('shapeSearch').addEventListener('input',e=>renderShapeMemory(e.target.value));renderShapeMemory();
+const previousAutoMorph=autoMorphFromSpeech;
+autoMorphFromSpeech=function(text,source='user'){
+ if(!document.getElementById('autoMorph')?.checked||!text)return;
+ const clean=norm(text),words=clean.split(/\s+/).filter(Boolean);
+ let winner=null,score=0;
+ for(const s of shapeMemory){let points=0;for(const term of s.keywords){let n=norm(term);if(!n)continue;
+ if(n.includes(' ')){if(clean.includes(n))points+=8;continue}
+ for(const word of words){if(word===n)points+=6;else if(n.length>=4&&word.startsWith(n))points+=3;}
+ }if(points>score){score=points;winner=s}}
+ if(winner&&score>=3){const id=shapeMemoryOffset+winner.id,now=Date.now();
+ if(morphLast!==String(id)||now-morphAt>4500){morphLast=String(id);morphAt=now;setShape(id);
+ document.getElementById('morphStatus').textContent='✧ Felismert fogalom: '+winner.name+' ('+source+')'}return;}
+ previousAutoMorph(text,source);
+};
+// Explicit command for returning to the original animated humanoid face.
+const shapeMemoryOriginal=autoMorphFromSpeech;
+autoMorphFromSpeech=function(text,source='user'){
+ if(/(?:mutasd magad|vissza.*(?:humanoid|noi|emberi)|legyel.*(?:humanoid|noi)|valtozz.*humanoid)/i.test(norm(text))){setShape(12);return}
+ shapeMemoryOriginal(text,source)
+};
+
+</script></body></html>
